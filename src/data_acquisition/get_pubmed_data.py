@@ -11,7 +11,6 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
 # --- Configuration ---
 
 # Fully populated list of companies and their search aliases.
-# You can add more aliases to any company to improve search results.
 COMPANY_SEARCH_TERMS = {
     # --- AI-Native Drug Discovery ---
     'Recursion': {"aliases": ["Recursion Pharmaceuticals", "Recursion"], "type": "affiliation"},
@@ -25,7 +24,7 @@ COMPANY_SEARCH_TERMS = {
     'Tempus': {"aliases": ["Tempus Labs", "Tempus AI"], "type": "affiliation"},
     'Guardant Health': {"aliases": ["Guardant Health"], "type": "affiliation"},
     'iRhythm': {"aliases": ["iRhythm Technologies", "iRhythm"], "type": "affiliation"},
-    'Butterfly Network': {"aliases": ["Butterfly Network Inc"], "type": "affiliation"},
+    'Butterfly Network': {"aliases": ["Butterfly Network Inc", "BFLY"], "type": "affiliation"},
     'GeneDx': {"aliases": ["GeneDx", "Sema4"], "type": "affiliation"},
     'NeoGenomics': {"aliases": ["NeoGenomics Laboratories", "NeoGenomics"], "type": "affiliation"},
     'Lunit': {"aliases": ["Lunit Inc"], "type": "affiliation"},
@@ -58,16 +57,16 @@ Entrez.email = "your.email@example.com"
 # Keywords for the main AI theme
 AI_KEYWORDS = "(\"artificial intelligence\"[MeSH Terms] OR \"artificial intelligence\"[Title/Abstract] OR \"machine learning\"[MeSH Terms] OR \"machine learning\"[Title/Abstract] OR \"deep learning\"[Title/Abstract] OR \"computational model\"[Title/Abstract])"
 
-# This is used for the broader search logic now
+# Define output paths
 OUTPUT_DIR = PROJECT_ROOT / "data" / "raw" / "pubmed_data"
-OUTPUT_FILE = OUTPUT_DIR / "pubmed_ai_papers.csv" # Renamed for clarity
+OUTPUT_FILE = OUTPUT_DIR / "pubmed_ai_papers.csv"
 
 # --- Main Functions ---
 
 def search_pubmed(query, max_results=100):
     """Generic function to search PubMed and fetch publication details."""
     try:
-        time.sleep(0.5) # Be polite to the API server
+        time.sleep(0.5)
         print(f"  Searching PubMed with query: {query[:120]}...")
         handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results)
         record = Entrez.read(handle)
@@ -96,17 +95,23 @@ def process_records(records, company_name, search_type):
         try:
             medline_citation = record.get('MedlineCitation', {})
             article = medline_citation.get('Article', {})
+            journal = article.get('Journal', {})
+            journal_title = journal.get('Title', 'No Journal Title')
             title = article.get('ArticleTitle', 'No Title')
             abstract_list = article.get('Abstract', {}).get('AbstractText', [])
             abstract = ' '.join(abstract_list) if abstract_list else 'No Abstract'
-            pub_date = article.get('Journal', {}).get('JournalIssue', {}).get('PubDate', {})
+            pub_date = journal.get('JournalIssue', {}).get('PubDate', {})
             year = pub_date.get('Year', str(pub_date.get('MedlineDate', 'N/A')).split(' ')[0])
             pmid = medline_citation.get('PMID', f'NO_PMID_{i}')
 
             processed_data.append({
-                'company_scraped': company_name, 'search_type': search_type,
-                'pmid': str(pmid), 'publish_year': year,
-                'title': title, 'abstract': abstract
+                'company_scraped': company_name,
+                'search_type': search_type,
+                'pmid': str(pmid),
+                'publish_year': year,
+                'journal_title': journal_title,
+                'title': title,
+                'abstract': abstract
             })
         except Exception:
             continue
