@@ -1,0 +1,41 @@
+# --- Virtual Environment ---
+# Ignore the virtual environment folder
+env/
+venv/
+.venv/
+new_env/
+
+
+# --- Python Cache & System Files ---
+# Ignore compiled Python files and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# --- IDE and OS Specific Files ---
+# Ignore settings from VS Code, other IDEs, and macOS
+.vscode/
+.idea/
+.DS_Store
+
+# --- Data Files ---
+# IMPORTANT: Do not commit raw or processed data files.
+# Your code should generate these, but the repository should not store them.
+data/raw/
+data/processed/
+# You can uncomment specific file types if you have them in the root
+# *.csv
+# *.json
+# *.parquet
+
+# --- Secrets & Credentials ---
+# NEVER commit your API keys or secret tokens!
+secrets.ini
+config.py
+credentials.json
+new_env/
+data/raw/
